@@ -1,0 +1,3 @@
+{
+  "content": "{\"questions\":[{\"id\":\"q1\",\"question\":\"解释 event loop\",\"answer\":{\"status\":\"known\",\"value\":\"我解释了宏任务与微任务\"},\"interviewerFollowUp\":{\"status\":\"unknown\"},\"sourceQuote\":\"面试官问了 event loop\"}],\"overallImpression\":{\"status\":\"known\",\"value\":\"交流平稳\"},\"uncertainties\":[\"不记得后续追问\"]}"
+}

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+out/
+release/
+coverage/
+playwright-report/
+test-results/
+
+# Runtime data and local secrets
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+secrets.json
+secrets.json.tmp
+.env
+.env.*
+!.env.example
+
+# Logs and local caches
+*.log
+*.tsbuildinfo
+.eslintcache
+.vite/
+.cache/
+
+# Editors and operating systems
+.idea/
+.vs/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
+
+# Local release credentials
+*.pfx
+*.p12
+*.pem
+*.key

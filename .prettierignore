@@ -1,0 +1,9 @@
+node_modules
+dist
+out
+release
+.agents
+pnpm-lock.yaml
+apps/desktop/src/renderer/src/assets
+apps/desktop/build
+apps/desktop/resources
