@@ -41,4 +41,27 @@ describe('IPC contract', () => {
       })
     ).toThrow(ZodError)
   })
+
+  it('validates the persisted review-flow boundary', () => {
+    expect(
+      parseIpcResponse('review.get-state', {
+        ok: true,
+        data: {
+          interviewId: 'interview-1',
+          interview: {
+            company: '示例科技',
+            role: '前端工程师',
+            occurredAt: '2026-09-04T09:00:00.000Z',
+            round: '一面'
+          },
+          stage: 'targeted_questions',
+          operationStatus: 'idle',
+          freeRecall: '解释 event loop',
+          items: [],
+          diagnoses: [],
+          evidence: []
+        }
+      })
+    ).toMatchObject({ ok: true, data: { stage: 'targeted_questions' } })
+  })
 })

@@ -47,13 +47,16 @@ export function rebuildCapabilityProjection(
   )
   const supporting = active.filter((entry) => entry.polarity === 'positive')
   const challenging = active.filter((entry) => entry.polarity === 'negative')
+  const stableEligibleSupporting = supporting.filter(
+    (entry) => entry.sourceType === 'spaced_retest' || entry.sourceType === 'real_interview'
+  )
   const score =
     supporting.reduce((sum, entry) => sum + entry.strength, 0) -
     challenging.reduce((sum, entry) => sum + entry.strength, 0)
   const state: CapabilityState =
     active.length === 0
       ? 'unknown'
-      : score >= 5 && supporting.length >= 2
+      : score >= 5 && supporting.length >= 2 && stableEligibleSupporting.length > 0
         ? 'stable'
         : score >= 2
           ? 'basic'

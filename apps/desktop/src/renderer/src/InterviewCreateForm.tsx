@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { zhCN } from './i18n/zh-CN'
 import type { IpcRequestPayload } from '@devreplay/shared'
 
 interface InterviewCreateFormProps {
@@ -37,24 +38,24 @@ export function InterviewCreateForm({
   return (
     <form className="form-card" onSubmit={submit}>
       <div className="section-heading">
-        <p className="eyebrow">第一场真实面试</p>
-        <h1>创建面试复盘</h1>
-        <p>创建后先自由回忆，不会立即产生能力结论。</p>
+        <p className="eyebrow">{zhCN.createInterview.eyebrow}</p>
+        <h1>{zhCN.createInterview.title}</h1>
+        <p>{zhCN.createInterview.description}</p>
       </div>
 
-      {!hasResume && <p className="notice error">请先保存简历快照，才能创建面试。</p>}
+      {!hasResume && <p className="notice error">{zhCN.createInterview.missingResume}</p>}
 
       <div className="field-grid">
         <label>
-          公司
+          {zhCN.createInterview.company}
           <input value={company} onChange={(event) => setCompany(event.target.value)} />
         </label>
         <label>
-          岗位
+          {zhCN.createInterview.role}
           <input value={role} onChange={(event) => setRole(event.target.value)} />
         </label>
         <label>
-          面试时间
+          {zhCN.createInterview.occurredAt}
           <input
             type="datetime-local"
             value={occurredAt}
@@ -62,13 +63,13 @@ export function InterviewCreateForm({
           />
         </label>
         <label>
-          轮次
+          {zhCN.createInterview.round}
           <input value={round} onChange={(event) => setRound(event.target.value)} />
         </label>
       </div>
 
       <label>
-        JD 文本（可选）
+        {zhCN.createInterview.jd}
         <textarea
           value={jobDescription}
           onChange={(event) => {
@@ -85,12 +86,12 @@ export function InterviewCreateForm({
             checked={confirmWithoutJobDescription}
             onChange={(event) => setConfirmWithoutJobDescription(event.target.checked)}
           />
-          我知道缺少 JD 会降低诊断相关性，仍然继续
+          {zhCN.createInterview.noJdConfirm}
         </label>
       )}
 
       <button type="submit" disabled={!canSubmit}>
-        创建并开始自由回忆
+        {zhCN.createInterview.submit}
       </button>
     </form>
   )

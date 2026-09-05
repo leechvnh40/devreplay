@@ -5,6 +5,7 @@ import {
   reviseReviewItem,
   type ReviewItem
 } from '@devreplay/domain'
+import { zhCN } from './i18n/zh-CN'
 
 const initialItems: readonly ReviewItem[] = [
   createReviewItem({
@@ -34,31 +35,33 @@ export function ReviewWorkspace(): React.JSX.Element {
   }
 
   return (
-    <section className="review-workspace" aria-label="结构化复盘工作区">
+    <section className="review-workspace" aria-label={zhCN.review.workspace}>
       <div className="review-column conversation-column">
-        <p className="eyebrow">回忆与追问</p>
-        <h2>面试对话</h2>
-        <p className="recall-guidance">先按记忆还原；记不清的内容可以明确标为未知。</p>
+        <p className="eyebrow">{zhCN.review.recall}</p>
+        <h2>{zhCN.review.conversation}</h2>
+        <p className="recall-guidance">{zhCN.review.guidance}</p>
       </div>
       <div className="review-column structured-column">
-        <p className="eyebrow">结构化结果</p>
-        <h2>复盘卡</h2>
+        <p className="eyebrow">{zhCN.review.result}</p>
+        <h2>{zhCN.review.card}</h2>
         {items.map((item) => {
           const current = currentReviewItemRevision(item)
           return (
             <article className="review-item-card" key={item.id}>
               <label>
-                面试问题
+                {zhCN.review.question}
                 <textarea
-                  aria-label="面试问题"
+                  aria-label={zhCN.review.question}
                   value={current.content}
                   onChange={(event) => revise(item, event.target.value)}
                 />
               </label>
               <div className="source-row">
-                <span className="source-badge">当前来源：{current.provenance.sourceType}</span>
+                <span className="source-badge">
+                  {zhCN.review.currentSource}：{current.provenance.sourceType}
+                </span>
                 <details>
-                  <summary>查看原始来源</summary>
+                  <summary>{zhCN.review.originalSource}</summary>
                   <p>{item.original.content}</p>
                   <small>{item.original.provenance.sourceType}</small>
                 </details>
@@ -66,6 +69,56 @@ export function ReviewWorkspace(): React.JSX.Element {
             </article>
           )
         })}
+      </div>
+    </section>
+  )
+}
+
+export function PersistentReviewWorkspace({
+  items,
+  onRevise
+}: {
+  items: readonly {
+    id: string
+    question: string
+    originalQuestion?: string
+    sourceType: string
+  }[]
+  onRevise(itemId: string, question: string): void
+}): React.JSX.Element {
+  return (
+    <section className="review-workspace" aria-label={zhCN.review.workspace}>
+      <div className="review-column conversation-column">
+        <p className="eyebrow">{zhCN.review.recall}</p>
+        <h2>{zhCN.review.conversation}</h2>
+        <p className="recall-guidance">{zhCN.review.questionGuidance}</p>
+      </div>
+      <div className="review-column structured-column">
+        <p className="eyebrow">{zhCN.review.result}</p>
+        <h2>{zhCN.review.card}</h2>
+        {items.map((item) => (
+          <article className="review-item-card" key={item.id}>
+            <label>
+              {zhCN.review.question}
+              <textarea
+                aria-label={`${zhCN.review.question}-${item.id}`}
+                value={item.question}
+                onChange={(event) => onRevise(item.id, event.target.value)}
+              />
+            </label>
+            <div className="source-row">
+              <span className="source-badge">
+                {zhCN.review.currentSource}：{item.sourceType}
+              </span>
+              {item.originalQuestion && (
+                <details>
+                  <summary>{zhCN.review.originalSource}</summary>
+                  <p>{item.originalQuestion}</p>
+                </details>
+              )}
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   )

@@ -233,6 +233,24 @@ export const settings = sqliteTable('settings', {
   updatedAt: text('updated_at').notNull()
 })
 
+export const datasets = sqliteTable('datasets', {
+  id: text('id').primaryKey(),
+  datasetKind: text('dataset_kind').notNull(),
+  createdAt: text('created_at').notNull()
+})
+
+export const datasetRecords = sqliteTable(
+  'dataset_records',
+  {
+    datasetId: text('dataset_id')
+      .notNull()
+      .references(() => datasets.id, { onDelete: 'cascade' }),
+    tableName: text('table_name').notNull(),
+    recordId: text('record_id').notNull()
+  },
+  (table) => [primaryKey({ columns: [table.datasetId, table.tableName, table.recordId] })]
+)
+
 export const schemaMigrations = sqliteTable('schema_migrations', {
   version: integer('version').primaryKey(),
   name: text('name').notNull(),
@@ -244,6 +262,8 @@ export const schema = {
   capabilityNodes,
   capabilityProjection,
   contextManifestItems,
+  datasetRecords,
+  datasets,
   diagnosticHypotheses,
   evidenceEntries,
   interviews,

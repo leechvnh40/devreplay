@@ -1,5 +1,8 @@
+import { z } from 'zod'
 import type { ModelProvider, ModelRequest, ModelResult } from './model-provider'
+import type { ContextManifestItem } from './context-manifest'
 import type { PromptVersion } from './prompt-registry'
+import { requestStructuredOutput, type StructuredOutputResult } from './structured-output'
 
 export interface ModelRunStart {
   readonly id: string
@@ -8,6 +11,7 @@ export interface ModelRunStart {
   readonly provider: 'deepseek'
   readonly modelId: string
   readonly request: unknown
+  readonly contextItems?: readonly ContextManifestItem[]
   readonly createdAt: string
 }
 
@@ -35,6 +39,7 @@ export interface AuditedModelRequest {
   readonly prompt: PromptVersion
   readonly request: ModelRequest
   readonly requestMetadata?: unknown
+  readonly contextItems?: readonly ContextManifestItem[]
   readonly signal?: AbortSignal
 }
 
@@ -56,6 +61,7 @@ export class AuditedModelRunner {
         modelRequest: input.request,
         metadata: input.requestMetadata
       }),
+      ...(input.contextItems ? { contextItems: input.contextItems } : {}),
       createdAt: this.now()
     })
 
@@ -72,6 +78,75 @@ export class AuditedModelRunner {
         completedAt: this.now()
       })
       return structuredResult
+    } catch (error) {
+      this.auditStore.fail(input.runId, {
+        error: serializeError(error),
+        completedAt: this.now()
+      })
+      throw error
+    }
+  }
+
+  async runStructured<T>(
+    input: AuditedModelRequest,
+    schema: z.ZodType<T>
+  ): Promise<StructuredOutputResult<T>> {
+    this.auditStore.start({
+      id: input.runId,
+      ...(input.interviewId ? { interviewId: input.interviewId } : {}),
+      prompt: input.prompt,
+      provider: 'deepseek',
+      modelId: input.request.modelId,
+      request: redactSensitiveData({
+        modelRequest: input.request,
+        metadata: input.requestMetadata
+      }),
+      ...(input.contextItems ? { contextItems: input.contextItems } : {}),
+      createdAt: this.now()
+    })
+
+    const results: ModelResult[] = []
+    const recordingProvider: ModelProvider = {
+      complete: async (request, options) => {
+        const result = await this.provider.complete(request, options)
+        results.push(result)
+        return result
+      }
+    }
+
+    try {
+      const structured = await requestStructuredOutput({
+        provider: recordingProvider,
+        request: input.request,
+        schema,
+        ...(input.signal ? { signal: input.signal } : {})
+      })
+      if (!structured.ok) {
+        this.auditStore.fail(input.runId, {
+          error: {
+            kind: structured.errorCode,
+            message: structured.message,
+            rawOutputs: structured.rawOutputs
+          },
+          completedAt: this.now()
+        })
+        return structured
+      }
+
+      this.auditStore.succeed(input.runId, {
+        rawResponse: results.map((result) => result.rawResponse),
+        structuredResult: structured.value,
+        usage: results.reduce(
+          (usage, result) => ({
+            inputTokens: usage.inputTokens + result.usage.inputTokens,
+            outputTokens: usage.outputTokens + result.usage.outputTokens,
+            totalTokens: usage.totalTokens + result.usage.totalTokens
+          }),
+          { inputTokens: 0, outputTokens: 0, totalTokens: 0 }
+        ),
+        completedAt: this.now()
+      })
+      return structured
     } catch (error) {
       this.auditStore.fail(input.runId, {
         error: serializeError(error),

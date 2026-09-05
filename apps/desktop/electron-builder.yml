@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: devreplay-desktop
+appId: com.devreplay.desktop
+productName: DevReplay
 directories:
   buildResources: build
 files:
@@ -9,12 +9,17 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!scripts/*'
 asarUnpack:
   - resources/**
 win:
-  executableName: devreplay-desktop
+  executableName: DevReplay
+  target:
+    - target: nsis
+      arch:
+        - x64
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: DevReplay-${version}-windows-x64-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -38,6 +43,3 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: true
-publish:
-  provider: generic
-  url: https://example.com/auto-updates

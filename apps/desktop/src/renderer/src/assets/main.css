@@ -11,9 +11,67 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
+
+.primary-nav {
+  display: flex;
+  width: min(100%, 880px);
+  gap: 8px;
+  margin: 0 auto 28px;
+  padding: 6px;
+  border: 1px solid #d7ddd2;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.nav-button {
+  flex: 1;
+  background: transparent;
+  color: #526052;
+}
+
+.nav-button.active {
+  background: #395f35;
+  color: white;
+}
+
+.today-action {
+  display: grid;
+  gap: 22px;
+  padding: 28px;
+  border: 1px solid #cbd7c7;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.factor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.capability-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 20px;
+}
+
+.evidence-row {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #d7ddd2;
+}
+
+.evidence-polarity {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.evidence-polarity.positive { color: #3c6f3c; }
+.evidence-polarity.negative { color: #9a4141; }
 
 .app-shell {
   min-height: 100vh;

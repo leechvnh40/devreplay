@@ -5,8 +5,13 @@
   "type": "module",
   "exports": "./src/index.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "quickjs-emscripten": "^0.32.0",
+    "typescript": "^5.9.3"
   }
 }

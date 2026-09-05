@@ -5,8 +5,37 @@ import icon from '../../resources/icon.png?asset'
 import { createCompositionRoot, type CompositionRoot } from './composition-root'
 import { registerIpcHandlers } from './ipc'
 import { createMainWindowOptions } from './window-options'
+import type { ModelProvider } from '@devreplay/agent'
 
 let compositionRoot: CompositionRoot | undefined
+
+// DevReplay does not render GPU-heavy content. Software rendering also keeps
+// the app usable on Windows VMs and older interview/demo machines.
+app.disableHardwareAcceleration()
+
+const e2eProvider: ModelProvider = {
+  complete: async (request) => ({
+    provider: 'deepseek',
+    requestId: 'e2e-fixture-run',
+    modelId: request.modelId,
+    content: JSON.stringify({
+      questions: [
+        {
+          id: 'q1',
+          question: 'Explain the JavaScript event loop.',
+          answer: { status: 'unknown' },
+          interviewerFollowUp: { status: 'unknown' },
+          sourceQuote: 'event loop'
+        }
+      ],
+      overallImpression: { status: 'known', value: 'fixture' },
+      uncertainties: ['需要验证微任务时序']
+    }),
+    finishReason: 'stop',
+    usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+    rawResponse: { fixture: true }
+  })
+}
 
 function createWindow(): void {
   const isSecuritySmoke = process.env['DEVREPLAY_SECURITY_SMOKE'] === '1'
@@ -43,7 +72,12 @@ function createWindow(): void {
           onboardingKeys: Object.keys(globalThis.devReplay?.onboarding ?? {}),
           interviewKeys: Object.keys(globalThis.devReplay?.interviews ?? {}),
           reviewKeys: Object.keys(globalThis.devReplay?.reviews ?? {}),
-          modelKeys: Object.keys(globalThis.devReplay?.model ?? {})
+          modelKeys: Object.keys(globalThis.devReplay?.model ?? {}),
+          trainingKeys: Object.keys(globalThis.devReplay?.training ?? {}),
+          workspaceKeys: Object.keys(globalThis.devReplay?.workspace ?? {}),
+          capabilityKeys: Object.keys(globalThis.devReplay?.capabilities ?? {}),
+          demoKeys: Object.keys(globalThis.devReplay?.demo ?? {}),
+          dataKeys: Object.keys(globalThis.devReplay?.data ?? {})
         })`)) as {
           processType: string
           requireType: string
@@ -54,18 +88,31 @@ function createWindow(): void {
           interviewKeys: string[]
           reviewKeys: string[]
           modelKeys: string[]
+          trainingKeys: string[]
+          workspaceKeys: string[]
+          capabilityKeys: string[]
+          demoKeys: string[]
+          dataKeys: string[]
         }
         const passed =
           result.processType === 'undefined' &&
           result.requireType === 'undefined' &&
           result.electronType === 'undefined' &&
-          result.apiKeys.join(',') === 'system,onboarding,interviews,reviews,model' &&
+          result.apiKeys.join(',') ===
+            'system,onboarding,interviews,reviews,model,training,workspace,capabilities,demo,data' &&
           result.systemKeys.length === 1 &&
           result.systemKeys[0] === 'getStatus' &&
           result.onboardingKeys.join(',') === 'getState,save' &&
           result.interviewKeys.join(',') === 'create,list' &&
-          result.reviewKeys.join(',') === 'getDraft,saveFreeRecall' &&
-          result.modelKeys.join(',') === 'getSettings,saveSettings'
+          result.reviewKeys.join(',') ===
+            'getDraft,saveFreeRecall,getState,getAnalysisPreview,analyze,cancelAnalysis,reviseItem,answerQuestion,finishQuestions,resolveDiagnosis,skipEmptyDiagnoses,acknowledgeEvidence,completeWithoutTraining' &&
+          result.modelKeys.join(',') === 'getSettings,saveSettings' &&
+          result.trainingKeys.join(',') ===
+            'list,getCodeTask,runCode,submitCode,getExplanationTask,submitExplanation' &&
+          result.workspaceKeys.join(',') === 'getToday' &&
+          result.capabilityKeys.join(',') === 'getProfile,switchTarget' &&
+          result.demoKeys.join(',') === 'getStatus,load,clear' &&
+          result.dataKeys.join(',') === 'export,import,clearPlan,clearAll'
 
         console.log(`DEVREPLAY_SECURITY_SMOKE ${JSON.stringify(result)}`)
         app.exit(passed ? 0 : 1)
@@ -88,7 +135,8 @@ app.whenReady().then(() => {
   const dataDirectory = isSecuritySmoke ? app.getPath('temp') : app.getPath('userData')
   compositionRoot = createCompositionRoot(
     isSecuritySmoke ? ':memory:' : join(dataDirectory, 'devreplay.sqlite'),
-    join(dataDirectory, isSecuritySmoke ? 'devreplay-smoke-secrets.json' : 'secrets.json')
+    join(dataDirectory, isSecuritySmoke ? 'devreplay-smoke-secrets.json' : 'secrets.json'),
+    process.env['DEVREPLAY_E2E'] === '1' ? { providerFactory: () => e2eProvider } : {}
   )
 
   // Default open or close DevTools by F12 in development

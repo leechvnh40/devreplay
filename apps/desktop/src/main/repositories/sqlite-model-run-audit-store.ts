@@ -6,7 +6,7 @@ import type {
   PromptVersion
 } from '@devreplay/agent'
 import { eq } from 'drizzle-orm'
-import { modelRuns, promptVersions, type AppDatabase } from '../database'
+import { contextManifestItems, modelRuns, promptVersions, type AppDatabase } from '../database'
 
 export class SqliteModelRunAuditStore implements ModelRunAuditStore {
   constructor(private readonly database: AppDatabase) {}
@@ -35,6 +35,23 @@ export class SqliteModelRunAuditStore implements ModelRunAuditStore {
         updatedAt: run.createdAt
       })
       .run()
+
+    if (run.contextItems?.length) {
+      this.database.orm
+        .insert(contextManifestItems)
+        .values(
+          run.contextItems.map((item) => ({
+            id: `${run.id}:${item.id}`,
+            modelRunId: run.id,
+            kind: item.kind,
+            sourceId: item.sourceId,
+            required: item.required,
+            included: item.included,
+            estimatedChars: item.estimatedChars
+          }))
+        )
+        .run()
+    }
   }
 
   succeed(runId: string, result: ModelRunSuccess): void {

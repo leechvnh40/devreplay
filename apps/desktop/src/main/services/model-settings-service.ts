@@ -72,6 +72,10 @@ export class ModelSettingsService {
     return apiKey
   }
 
+  clearCredentials(): void {
+    this.secretStore.clear()
+  }
+
   private parseModelId(value: string): string {
     const parsed: unknown = JSON.parse(value)
     if (typeof parsed !== 'string' || !parsed.trim()) throw new Error('模型 ID 设置损坏')

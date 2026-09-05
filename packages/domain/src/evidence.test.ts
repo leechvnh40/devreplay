@@ -45,18 +45,50 @@ describe('append-only evidence projection', () => {
       )
     )
   })
+
+  it('does not treat repeated ordinary training passes as stable evidence', () => {
+    const projection = rebuildCapabilityProjection('javascript', [
+      entry('training-1', 'positive', 3, {}, 'training_verification'),
+      entry('training-2', 'positive', 3, {}, 'training_verification')
+    ])
+
+    expect(projection.state).toBe('basic')
+  })
+
+  it.each(['spaced_retest', 'real_interview'] as const)(
+    'allows %s evidence to qualify an otherwise sufficient projection as stable',
+    (sourceType) => {
+      const projection = rebuildCapabilityProjection('javascript', [
+        entry('training-1', 'positive', 3, {}, 'training_verification'),
+        entry('qualified-1', 'positive', 3, {}, sourceType)
+      ])
+
+      expect(projection.state).toBe('stable')
+    }
+  )
+
+  it('lets contradictory evidence prevent a qualified projection from becoming stable', () => {
+    const projection = rebuildCapabilityProjection('javascript', [
+      entry('training-1', 'positive', 3, {}, 'training_verification'),
+      entry('retest-1', 'positive', 3, {}, 'spaced_retest'),
+      entry('interview-1', 'negative', 3, {}, 'real_interview')
+    ])
+
+    expect(projection.state).toBe('basic')
+  })
 })
 
 function entry(
   id: string,
   polarity: EvidenceEntry['polarity'],
   strength: EvidenceEntry['strength'],
-  relation: Pick<EvidenceEntry, 'supersedesId' | 'retractsId'> = {}
+  relation: Pick<EvidenceEntry, 'supersedesId' | 'retractsId'> = {},
+  sourceType: EvidenceEntry['sourceType'] = 'user_statement'
 ): EvidenceEntry {
   return createEvidenceEntry({
     id,
     capabilityId: 'javascript',
-    sourceType: 'user_statement',
+    sourceType,
     polarity,
     strength,
     content: { summary: id },

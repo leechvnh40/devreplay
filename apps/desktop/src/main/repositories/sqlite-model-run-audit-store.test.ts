@@ -1,6 +1,7 @@
 import {
   AuditedModelRunner,
   ModelProviderError,
+  createContextManifest,
   getPromptVersion,
   type ModelProvider,
   type ModelResult
@@ -65,7 +66,26 @@ describe('SQLite model run audit', () => {
             request: baseRequest,
             requestMetadata: {
               headers: { Authorization: 'Bearer sk-never-store', 'x-trace': 'trace-1' }
-            }
+            },
+            contextItems: createContextManifest([
+              {
+                id: 'recall',
+                kind: 'current_recall',
+                sourceId: 'review-1',
+                label: '自由回忆',
+                content: '复盘内容',
+                required: true
+              },
+              {
+                id: 'resume',
+                kind: 'resume_excerpt',
+                sourceId: 'resume-1',
+                label: '简历',
+                content: '不发送的简历',
+                required: false,
+                included: false
+              }
+            ]).items
           },
           (content) => JSON.parse(content) as unknown
         )
@@ -88,6 +108,16 @@ describe('SQLite model run audit', () => {
       expect(
         harness.database.sqlite.prepare('SELECT count(*) AS count FROM prompt_versions').get()
       ).toEqual({ count: 1 })
+      expect(
+        harness.database.sqlite
+          .prepare(
+            'SELECT kind, source_id, required, included FROM context_manifest_items ORDER BY id'
+          )
+          .all()
+      ).toEqual([
+        { kind: 'current_recall', source_id: 'review-1', required: 1, included: 1 },
+        { kind: 'resume_excerpt', source_id: 'resume-1', required: 0, included: 0 }
+      ])
     } finally {
       harness.database.close()
     }

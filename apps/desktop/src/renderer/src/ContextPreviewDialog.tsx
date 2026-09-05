@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { zhCN } from './i18n/zh-CN'
 
 export interface ContextPreviewItem {
   readonly id: string
@@ -54,7 +55,7 @@ export function ContextPreviewDialog({
       )
     } catch (reason) {
       if (!nextController.signal.aborted) {
-        setError(reason instanceof Error ? reason.message : '发送失败')
+        setError(reason instanceof Error ? reason.message : zhCN.preview.sendFailed)
       }
     } finally {
       setSending(false)
@@ -65,12 +66,13 @@ export function ContextPreviewDialog({
   return (
     <section className="preview-dialog" role="dialog" aria-labelledby="context-preview-title">
       <div className="section-heading">
-        <p className="eyebrow">发送前确认</p>
-        <h2 id="context-preview-title">将发送到 DeepSeek 的内容</h2>
-        <p>仅本次勾选内容会离开本机。展开每项可检查原文。</p>
+        <p className="eyebrow">{zhCN.preview.eyebrow}</p>
+        <h2 id="context-preview-title">{zhCN.preview.title}</h2>
+        <p>{zhCN.preview.description}</p>
       </div>
       <p className="preview-total">
-        约 {totals.characters} 字符 / {totals.tokens} tokens
+        {zhCN.preview.approximate} {totals.characters} {zhCN.preview.characters} / {totals.tokens}{' '}
+        tokens
       </p>
       <div className="preview-items">
         {items.map((item) => (
@@ -88,9 +90,11 @@ export function ContextPreviewDialog({
                     }))
                   }
                 />
-                {item.label} {item.required ? '（必需）' : '（可选）'}
+                {item.label} {item.required ? zhCN.preview.required : zhCN.preview.optional}
               </label>
-              <small>{item.estimatedChars} 字符</small>
+              <small>
+                {item.estimatedChars} {zhCN.preview.characters}
+              </small>
             </summary>
             <pre>{item.content}</pre>
           </details>
@@ -99,10 +103,10 @@ export function ContextPreviewDialog({
       {error && <p className="notice error">{error}</p>}
       <div className="dialog-actions">
         <button className="secondary-button" onClick={cancel}>
-          {sending ? '取消请求' : '取消'}
+          {sending ? zhCN.preview.cancelRequest : zhCN.common.cancel}
         </button>
         <button disabled={sending} onClick={() => void confirm()}>
-          {sending ? '正在发送…' : '确认并发送'}
+          {sending ? zhCN.preview.sending : zhCN.preview.confirm}
         </button>
       </div>
     </section>

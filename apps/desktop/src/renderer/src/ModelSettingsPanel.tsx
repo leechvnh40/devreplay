@@ -1,11 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { zhCN } from './i18n/zh-CN'
 import type { ModelSettings } from '@devreplay/shared'
+import { DataManagementPanel } from './DataManagementPanel'
 
 export function ModelSettingsPanel({ onClose }: { onClose(): void }): React.JSX.Element {
   const [settings, setSettings] = useState<ModelSettings>()
   const [modelId, setModelId] = useState('deepseek-chat')
   const [apiKey, setApiKey] = useState('')
-  const [status, setStatus] = useState('正在读取配置…')
+  const [status, setStatus] = useState(zhCN.settings.loading)
+  const [demoLoaded, setDemoLoaded] = useState(false)
 
   useEffect(() => {
     void window.devReplay.model.getSettings().then((result) => {
@@ -17,16 +20,19 @@ export function ModelSettingsPanel({ onClose }: { onClose(): void }): React.JSX.
         setStatus(result.error.message)
       }
     })
+    void window.devReplay.demo.getStatus().then((result) => {
+      if (result.ok) setDemoLoaded(result.data.loaded)
+    })
   }, [])
 
   const submit = async (event: FormEvent): Promise<void> => {
     event.preventDefault()
-    setStatus('正在保存…')
+    setStatus(zhCN.settings.saving)
     const result = await window.devReplay.model.saveSettings({ modelId, apiKey })
     if (result.ok) {
       setSettings(result.data)
       setApiKey('')
-      setStatus('配置已安全保存在本机')
+      setStatus(zhCN.settings.saved)
     } else {
       setStatus(result.error.message)
     }
@@ -35,17 +41,17 @@ export function ModelSettingsPanel({ onClose }: { onClose(): void }): React.JSX.
   return (
     <section className="form-card">
       <button className="text-button" onClick={onClose}>
-        ← 返回面试
+        {zhCN.settings.back}
       </button>
       <div className="section-heading">
-        <p className="eyebrow">设置 / DEEPSEEK</p>
-        <h1>云模型配置</h1>
-        <p>DevReplay 只接入 DeepSeek。API Key 由 Windows 安全凭据能力保护，不写入业务数据库。</p>
+        <p className="eyebrow">{zhCN.settings.eyebrow}</p>
+        <h1>{zhCN.settings.title}</h1>
+        <p>{zhCN.settings.description}</p>
       </div>
       {settings && <p className="notice">{settings.cloudNotice}</p>}
       <form className="settings-form" onSubmit={submit}>
         <label>
-          模型 ID
+          {zhCN.settings.modelId}
           <input value={modelId} onChange={(event) => setModelId(event.target.value)} />
         </label>
         <label>
@@ -55,22 +61,55 @@ export function ModelSettingsPanel({ onClose }: { onClose(): void }): React.JSX.
             autoComplete="off"
             value={apiKey}
             placeholder={
-              settings?.keyConfigured ? '已配置；留空表示不修改' : '请输入 DeepSeek API Key'
+              settings?.keyConfigured
+                ? zhCN.settings.keySetPlaceholder
+                : zhCN.settings.keyPlaceholder
             }
             onChange={(event) => setApiKey(event.target.value)}
           />
         </label>
         <p className="save-status" role="status">
-          {settings?.keyConfigured ? '密钥状态：已配置（不会回显）' : '密钥状态：未配置'}
+          {settings?.keyConfigured ? zhCN.settings.keySet : zhCN.settings.keyMissing}
           {status ? ` · ${status}` : ''}
         </p>
         <button
           type="submit"
           disabled={!modelId.trim() || (!settings?.keyConfigured && !apiKey.trim())}
         >
-          保存 DeepSeek 配置
+          {zhCN.settings.save}
         </button>
       </form>
+      <section className="settings-form warning-box">
+        <h2>{zhCN.settings.demoTitle}</h2>
+        <p>{zhCN.settings.demoDescription}</p>
+        <button
+          className="secondary-button"
+          onClick={async () => {
+            const result = await window.devReplay.demo.load()
+            if (result.ok) {
+              setDemoLoaded(true)
+              setStatus(zhCN.settings.demoLoaded)
+            } else setStatus(result.error.message)
+          }}
+        >
+          {zhCN.settings.loadDemo}
+        </button>
+        {demoLoaded && (
+          <button
+            className="secondary-button"
+            onClick={async () => {
+              const result = await window.devReplay.demo.clear()
+              if (result.ok) {
+                setDemoLoaded(false)
+                setStatus(zhCN.settings.demoCleared)
+              } else setStatus(result.error.message)
+            }}
+          >
+            {zhCN.settings.clearDemo}
+          </button>
+        )}
+      </section>
+      <DataManagementPanel />
     </section>
   )
 }

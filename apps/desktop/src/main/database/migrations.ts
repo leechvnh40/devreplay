@@ -1,5 +1,6 @@
 import type Database from 'better-sqlite3'
 import versionOneSql from './migrations/0000_v1.sql?raw'
+import versionTwoSql from './migrations/0001_datasets.sql?raw'
 
 export interface DatabaseMigration {
   readonly version: number
@@ -8,7 +9,8 @@ export interface DatabaseMigration {
 }
 
 export const DATABASE_MIGRATIONS: readonly DatabaseMigration[] = Object.freeze([
-  Object.freeze({ version: 1, name: 'initial_schema', sql: versionOneSql })
+  Object.freeze({ version: 1, name: 'initial_schema', sql: versionOneSql }),
+  Object.freeze({ version: 2, name: 'dataset_isolation', sql: versionTwoSql })
 ])
 
 const MIGRATION_BREAKPOINT = '--> statement-breakpoint'

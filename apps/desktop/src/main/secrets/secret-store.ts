@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 
 export interface SecretCipher {
@@ -44,6 +44,10 @@ export class SecretStore {
     const document = this.readFile()
     if (!document) return undefined
     return this.cipher.decrypt(Buffer.from(document.deepseekApiKey, 'base64'))
+  }
+
+  clear(): void {
+    rmSync(this.filename, { force: true })
   }
 
   private readFile(): SecretsFileV1 | undefined {

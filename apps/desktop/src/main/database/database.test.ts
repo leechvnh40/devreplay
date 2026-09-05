@@ -70,7 +70,7 @@ describe('SQLite schema version 1', () => {
       applyMigrations(database.sqlite)
       expect(
         database.sqlite.prepare('SELECT count(*) AS count FROM schema_migrations').get()
-      ).toEqual({ count: 1 })
+      ).toEqual({ count: 2 })
     } finally {
       database.close()
     }

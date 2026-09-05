@@ -4,6 +4,8 @@ export const SOURCE_TYPES = [
   'agent_summary',
   'agent_inference',
   'training_verification',
+  'spaced_retest',
+  'real_interview',
   'user_revision'
 ] as const
 
