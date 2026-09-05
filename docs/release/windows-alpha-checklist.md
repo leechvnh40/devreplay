@@ -11,6 +11,7 @@
 
 ## 已知问题
 
+- Alpha prerelease：`https://github.com/leechvnh40/devreplay/releases/tag/v0.1.0-alpha.0`，包含 Windows x64 安装包与 SHA-256 校验文件。
 - Alpha 安装包未签名，SmartScreen 可能拦截；README 已提供来源与摘要核验步骤。
 - Windows 10 22H2 x64 使用 `DevReplay-0.1.0-alpha.0-windows-x64-setup.exe` 实测：静默安装和卸载退出码均为 0，已安装应用完成 onboarding、Demo、面试复盘、诊断确认、解释训练验收、复测安排与重启恢复；卸载后主程序和卸载器均不存在。E2E 使用独立临时用户数据目录并在结束时清除，没有改动真实用户数据。
 - 本次 Windows 10 验收安装包 SHA-256：`90ff437911a28f3941ba5caae93aeb78c70aa5d16bef1b1d228feb5149b7797d`。

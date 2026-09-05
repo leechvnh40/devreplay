@@ -63,4 +63,4 @@
 - [x] 4.12 编写最少 ADR，记录显式 Agent 状态机、证据账本和 QuickJS 沙箱选择，并检查内容不重复 OpenSpec 行为规格。
 - [x] 4.13 建立完整黄金路径 Playwright Electron E2E，覆盖模型设置、面试创建、复盘、诊断确认、训练、验收、复测安排和重启恢复。
 - [ ] 4.14 在 Windows 10 22H2 与 Windows 11 x64 分别执行安装、启动、黄金路径和卸载检查，记录已知问题并修复发布阻断项。
-- [ ] 4.15 执行 `openspec validate devreplay-alpha --strict`、全量测试、安装包冒烟和隐私检查，全部通过后创建 Alpha GitHub prerelease 与校验文件。
+- [x] 4.15 执行 `openspec validate devreplay-alpha --strict`、全量测试、安装包冒烟和隐私检查，全部通过后创建 Alpha GitHub prerelease 与校验文件。
